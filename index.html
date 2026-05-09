@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chaos Corner</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #17120f;
+      --paper: #fff6df;
+      --cream: #fff0b8;
+      --red: #ef3f3f;
+      --teal: #10b4a3;
+      --gold: #ffca3a;
+      --blue: #3156c8;
+      --pink: #ff6fb1;
+      --green: #4fd36f;
+      --shadow: rgba(23, 18, 15, .32);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      background:
+        linear-gradient(90deg, rgba(23,18,15,.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(23,18,15,.08) 1px, transparent 1px),
+        radial-gradient(circle at 12% 12%, rgba(255, 202, 58, .38), transparent 24%),
+        radial-gradient(circle at 88% 9%, rgba(255, 111, 177, .26), transparent 25%),
+        radial-gradient(circle at 78% 88%, rgba(16, 180, 163, .28), transparent 30%),
+        linear-gradient(145deg, #f95c43 0%, #f7b94b 44%, #35b9aa 100%);
+      background-size: 42px 42px, 42px 42px, auto, auto, auto, auto;
+      color: var(--paper);
+      font-family: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 10px, transparent 10px 34px),
+        linear-gradient(180deg, rgba(255,246,223,.22), transparent 28%, rgba(23,18,15,.1));
+      mix-blend-mode: soft-light;
+    }
+
+    .app {
+      width: min(1180px, calc(100vw - 24px));
+      min-height: 100vh;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 18px;
+      align-items: center;
+      padding: 18px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stage {
+      min-width: 0;
+      order: 1;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+      color: var(--ink);
+      text-shadow: 0 3px 0 var(--cream), 0 6px 0 rgba(23, 18, 15, .18);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.6rem);
+      line-height: .9;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      max-width: 650px;
+    }
+
+    .title-pop {
+      display: inline-block;
+      transform: rotate(-2deg);
+      filter: drop-shadow(0 4px 0 rgba(255, 246, 223, .44));
+    }
+
+    .title-pop:nth-child(2) {
+      color: var(--blue);
+      transform: rotate(1.5deg) translateY(2px);
+    }
+
+    .tagline {
+      max-width: 360px;
+      margin: 0;
+      border: 5px solid var(--ink);
+      border-radius: 8px;
+      background: var(--cream);
+      box-shadow: 0 6px 0 rgba(23, 18, 15, .24);
+      padding: 9px 12px;
+      font-size: .97rem;
+      font-weight: 1000;
+      text-align: right;
+      transform: rotate(1.4deg);
+    }
+
+    .bout-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .pill {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      border: 4px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 5px 0 rgba(23, 18, 15, .24);
+      padding: 5px 10px;
+      white-space: nowrap;
+    }
+
+    .ticker {
+      flex: 1;
+      overflow: hidden;
+      border: 4px solid var(--ink);
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--gold);
+      box-shadow: 0 5px 0 rgba(23, 18, 15, .24);
+      padding: 5px 0;
+      white-space: nowrap;
+    }
+
+    .ticker span {
+      display: inline-block;
+      min-width: 100%;
+      padding-left: 100%;
+      animation: marquee 12s linear infinite;
+    }
+
+    @keyframes marquee {
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 8px solid var(--ink);
+      border-radius: 8px;
+      background: #f7e2a0;
+      box-shadow: 0 18px 0 var(--shadow), 0 0 0 8px rgba(255, 246, 223, .26);
+      aspect-ratio: 16 / 10;
+    }
+
+    .mobile-fight-hud {
+      display: none;
+    }
+
+    .canvas-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 4px;
+      background:
+        radial-gradient(circle, var(--gold) 0 5px, transparent 6px) top left / 42px 18px repeat-x,
+        radial-gradient(circle, var(--pink) 0 5px, transparent 6px) bottom left / 42px 18px repeat-x,
+        radial-gradient(circle, var(--teal) 0 5px, transparent 6px) left top / 18px 42px repeat-y,
+        radial-gradient(circle, var(--blue) 0 5px, transparent 6px) right top / 18px 42px repeat-y;
+      opacity: .92;
+      animation: lights 1s steps(2, jump-none) infinite;
+    }
+
+    @keyframes lights {
+      50% {
+        filter: hue-rotate(115deg) brightness(1.16);
+      }
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: auto;
+      touch-action: none;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(23, 18, 15, .3);
+      backdrop-filter: blur(2px);
+      z-index: 2;
+    }
+
+    .overlay[hidden] {
+      display: none;
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      border: 7px solid var(--ink);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255, 202, 58, .7), transparent 20%),
+        linear-gradient(135deg, #fff6df 0%, #ffe6f1 52%, #d9fff6 100%);
+      color: var(--ink);
+      box-shadow: 0 10px 0 var(--shadow), inset 0 0 0 5px rgba(255,255,255,.5);
+      padding: 22px;
+      text-align: center;
+      transform: rotate(-1deg);
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 7vw, 4rem);
+      line-height: .88;
+      text-transform: uppercase;
+    }
+
+    .modal p {
+      margin: 8px auto 18px;
+      max-width: 38ch;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .button {
+      appearance: none;
+      border: 5px solid var(--ink);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffe071, var(--gold));
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 1000;
+      padding: 12px 18px;
+      box-shadow: 0 6px 0 var(--ink), 0 0 0 5px rgba(239, 63, 63, .14);
+      transform: translateY(0);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+
+    .button:hover {
+      background: #ffe071;
+    }
+
+    .button:active {
+      box-shadow: 0 2px 0 var(--ink);
+      transform: translateY(4px);
+    }
+
+    .side {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--ink);
+      order: 2;
+    }
+
+    .panel {
+      border: 6px solid var(--ink);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 246, 223, .96), rgba(255, 246, 223, .82)),
+        repeating-linear-gradient(-45deg, rgba(239,63,63,.14) 0 8px, transparent 8px 18px);
+      box-shadow: 0 10px 0 var(--shadow);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      pointer-events: none;
+      border: 2px dashed rgba(23, 18, 15, .18);
+      border-radius: 5px;
+    }
+
+    .panel h2,
+    .panel h3 {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .panel h2::after,
+    .panel h3::after {
+      content: "";
+      display: block;
+      width: 58px;
+      height: 7px;
+      margin-top: 7px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--red);
+    }
+
+    .stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      min-height: 74px;
+      border: 4px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 5px 0 rgba(23, 18, 15, .18);
+      transform: rotate(-.8deg);
+    }
+
+    .stat:nth-child(2),
+    .stat:nth-child(3) {
+      transform: rotate(.8deg);
+    }
+
+    .stat.hot {
+      background: linear-gradient(180deg, #fff, #ffe3e3);
+      animation: thump .4s ease;
+    }
+
+    .stat.low {
+      background: linear-gradient(180deg, #fff, #ffd0d0);
+    }
+
+    @keyframes thump {
+      50% {
+        transform: scale(1.04) rotate(1deg);
+      }
+    }
+
+    .label {
+      display: block;
+      color: #695042;
+      font-size: .73rem;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .value {
+      display: block;
+      font-size: clamp(1.55rem, 4vw, 2.35rem);
+      font-weight: 1000;
+      line-height: 1.1;
+      color: var(--ink);
+      text-shadow: 0 2px 0 var(--gold);
+    }
+
+    .meter {
+      height: 12px;
+      overflow: hidden;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: #ead5ad;
+      margin-top: 5px;
+    }
+
+    .meter span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--green);
+      transform-origin: left center;
+      transition: transform .12s linear;
+    }
+
+    .meter.guard span {
+      background: var(--teal);
+    }
+
+    .instructions {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .instructions li {
+      border-left: 8px solid var(--red);
+      background: rgba(255,255,255,.56);
+      border-radius: 6px;
+      padding: 7px 8px;
+    }
+
+    .key {
+      display: inline-flex;
+      min-width: 34px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--ink);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 3px 0 var(--ink);
+      margin-right: 6px;
+      padding: 0 7px;
+      font-size: .85rem;
+      vertical-align: middle;
+    }
+
+    .touch-pad {
+      display: none;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .touch-pad button {
+      min-height: 46px;
+      border: 4px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 1000;
+      touch-action: manipulation;
+      box-shadow: 0 4px 0 rgba(23,18,15,.2);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .touch-pad .wide {
+      grid-column: span 3;
+      background: var(--teal);
+    }
+
+    .sticker-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .sticker {
+      border: 4px solid var(--ink);
+      border-radius: 8px;
+      background: var(--pink);
+      color: var(--ink);
+      font-size: .78rem;
+      font-weight: 1000;
+      padding: 5px 8px;
+      transform: rotate(-3deg);
+    }
+
+    .sticker:nth-child(2) {
+      background: var(--gold);
+      transform: rotate(2deg);
+    }
+
+    .sticker:nth-child(3) {
+      background: var(--teal);
+      transform: rotate(-1deg);
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        width: min(100%, 760px);
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 12px;
+        padding: 10px 10px 132px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        font-size: clamp(2.1rem, 12vw, 4rem);
+        max-width: 100%;
+      }
+
+      .tagline {
+        max-width: 100%;
+        border-width: 4px;
+        padding: 7px 9px;
+        font-size: .9rem;
+        text-align: left;
+        transform: none;
+      }
+
+      .bout-banner {
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 8px;
+      }
+
+      .pill {
+        min-height: 31px;
+        border-width: 3px;
+        box-shadow: 0 3px 0 rgba(23, 18, 15, .22);
+        font-size: .86rem;
+        padding: 4px 8px;
+      }
+
+      .ticker {
+        order: 3;
+        flex-basis: 100%;
+        border-width: 3px;
+        font-size: .83rem;
+      }
+
+      .canvas-wrap {
+        border-width: 5px;
+        box-shadow: 0 10px 0 var(--shadow), 0 0 0 5px rgba(255, 246, 223, .26);
+        aspect-ratio: 4 / 3;
+      }
+
+      .mobile-fight-hud {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 6px;
+        margin: 0 0 8px;
+        color: var(--ink);
+      }
+
+      .hud-chip {
+        min-width: 0;
+        border: 3px solid var(--ink);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 4px 0 rgba(23, 18, 15, .22);
+        padding: 5px 6px;
+      }
+
+      .hud-chip span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .hud-label {
+        color: #695042;
+        font-size: .58rem;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+
+      .hud-value {
+        color: var(--ink);
+        font-size: clamp(1rem, 5.4vw, 1.45rem);
+        font-weight: 1000;
+        line-height: 1;
+        text-shadow: 0 2px 0 var(--gold);
+      }
+
+      .canvas-wrap::before {
+        inset: 5px;
+        background:
+          radial-gradient(circle, var(--gold) 0 3px, transparent 4px) top left / 26px 12px repeat-x,
+          radial-gradient(circle, var(--pink) 0 3px, transparent 4px) bottom left / 26px 12px repeat-x,
+          radial-gradient(circle, var(--teal) 0 3px, transparent 4px) left top / 12px 26px repeat-y,
+          radial-gradient(circle, var(--blue) 0 3px, transparent 4px) right top / 12px 26px repeat-y;
+      }
+
+      .overlay {
+        padding: 14px;
+      }
+
+      .modal {
+        border-width: 5px;
+        padding: 16px 14px;
+        transform: none;
+      }
+
+      .modal h2 {
+        font-size: clamp(2.3rem, 14vw, 4rem);
+      }
+
+      .modal p {
+        font-size: .92rem;
+      }
+
+      .button {
+        min-height: 48px;
+        padding: 10px 15px;
+      }
+
+      .side {
+        align-self: auto;
+      }
+
+      .panel {
+        border-width: 5px;
+        box-shadow: 0 7px 0 var(--shadow);
+        padding: 12px;
+      }
+
+      .panel h2,
+      .panel h3 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 7px;
+      }
+
+      .stat {
+        min-height: 66px;
+        border-width: 3px;
+        padding: 7px;
+        transform: none;
+      }
+
+      .stat:nth-child(2),
+      .stat:nth-child(3) {
+        transform: none;
+      }
+
+      .label {
+        font-size: .65rem;
+      }
+
+      .value {
+        font-size: clamp(1.2rem, 7vw, 1.8rem);
+      }
+
+      .meter {
+        height: 10px;
+        border-width: 2px;
+      }
+
+      .sticker-row {
+        display: none;
+      }
+
+      .instructions {
+        gap: 7px;
+        font-size: .92rem;
+      }
+
+      .instructions li {
+        padding: 6px 7px;
+        border-left-width: 6px;
+      }
+
+      .key {
+        min-width: 30px;
+        height: 25px;
+        border-width: 2px;
+        box-shadow: 0 2px 0 var(--ink);
+        margin-right: 4px;
+        padding: 0 5px;
+        font-size: .78rem;
+      }
+
+      .touch-pad {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        z-index: 5;
+        max-width: 740px;
+        margin: 0 auto;
+        border-width: 5px;
+        background:
+          linear-gradient(135deg, rgba(255, 246, 223, .96), rgba(217, 255, 246, .92)),
+          repeating-linear-gradient(-45deg, rgba(49,86,200,.16) 0 8px, transparent 8px 18px);
+        box-shadow: 0 8px 0 rgba(23,18,15,.3);
+        padding: 10px;
+      }
+
+      body.playing .touch-pad {
+        display: grid;
+      }
+
+      .touch-pad button {
+        min-height: 54px;
+        border-width: 3px;
+        font-size: .95rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        padding: 8px 8px 126px;
+      }
+
+      .mobile-fight-hud {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 5px;
+      }
+
+      .hud-chip {
+        padding: 5px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat {
+        min-height: 58px;
+      }
+
+      .canvas-wrap {
+        aspect-ratio: 1 / 1;
+      }
+
+      .instructions li:nth-child(3),
+      .instructions li:nth-child(4) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .topbar {
+        gap: 6px;
+      }
+
+      h1 {
+        font-size: clamp(1.95rem, 13vw, 3.2rem);
+      }
+
+      .tagline {
+        font-size: .82rem;
+      }
+
+      .pill {
+        font-size: .78rem;
+      }
+
+      .ticker {
+        font-size: .76rem;
+      }
+
+      .panel {
+        padding: 10px;
+      }
+
+      .hud-label {
+        font-size: .54rem;
+      }
+
+      .hud-value {
+        font-size: clamp(.98rem, 5.6vw, 1.25rem);
+      }
+
+      .panel h2::after,
+      .panel h3::after {
+        width: 46px;
+        height: 6px;
+      }
+
+      .instructions {
+        font-size: .84rem;
+      }
+
+      .touch-pad {
+        left: 8px;
+        right: 8px;
+        bottom: calc(8px + env(safe-area-inset-bottom));
+        gap: 7px;
+        padding: 8px;
+      }
+
+      .touch-pad button {
+        min-height: 50px;
+        font-size: .85rem;
+      }
+    }
+
+    @media (max-height: 560px) and (orientation: landscape) {
+      .app {
+        width: min(100%, 980px);
+        grid-template-columns: minmax(0, 1fr) 260px;
+        padding: 8px 8px 92px;
+        gap: 10px;
+      }
+
+      .topbar {
+        flex-direction: row;
+        align-items: flex-end;
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 6vw, 3rem);
+      }
+
+      .tagline {
+        display: none;
+      }
+
+      .canvas-wrap {
+        aspect-ratio: 16 / 9;
+      }
+
+      .mobile-fight-hud {
+        display: grid;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .instructions {
+        display: none;
+      }
+
+      .touch-pad {
+        grid-template-columns: repeat(7, 1fr);
+        max-width: none;
+      }
+
+      body.playing .touch-pad {
+        display: grid;
+      }
+
+      .touch-pad .wide {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="stage" aria-label="Chaos Corner game">
+      <div class="topbar">
+        <h1><span class="title-pop">Chaos</span> <span class="title-pop">Corner</span></h1>
+        <p class="tagline">Dodge the flurry, block the big shots, and counter before the bell.</p>
+      </div>
+      <div class="bout-banner" aria-label="Bout status">
+        <span class="pill">Round 1</span>
+        <div class="ticker"><span>Slip! Block! Counter! The corner is loud and the gloves are extremely unserious.</span></div>
+        <span class="pill">60s Bout</span>
+      </div>
+      <div class="mobile-fight-hud" aria-label="Mobile fight status">
+        <div class="hud-chip">
+          <span class="hud-label">Score</span>
+          <span class="hud-value" id="mobileScore">0</span>
+        </div>
+        <div class="hud-chip">
+          <span class="hud-label">Time</span>
+          <span class="hud-value" id="mobileTime">60</span>
+        </div>
+        <div class="hud-chip">
+          <span class="hud-label">Health</span>
+          <span class="hud-value" id="mobileHealth">100</span>
+        </div>
+        <div class="hud-chip">
+          <span class="hud-label">Guard</span>
+          <span class="hud-value" id="mobileGuard">100</span>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="600" aria-label="Boxing mini arena"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="modal">
+            <h2 id="overlayTitle">Ready?</h2>
+            <p id="overlayText">Survive 60 seconds in the cartoon ring. Blocks score counters, but guard breaks if you lean on it.</p>
+            <button class="button" id="startButton">Start Bout</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side" aria-label="Game information">
+      <section class="panel">
+        <h2>Scoreboard</h2>
+        <div class="stats">
+          <div class="stat" id="scoreCard">
+            <span class="label">Score</span>
+            <span class="value" id="score">0</span>
+          </div>
+          <div class="stat" id="timeCard">
+            <span class="label">Time</span>
+            <span class="value" id="time">60</span>
+          </div>
+          <div class="stat" id="healthCard">
+            <span class="label">Health</span>
+            <span class="value" id="healthText">100</span>
+            <div class="meter"><span id="healthBar"></span></div>
+          </div>
+          <div class="stat" id="guardCard">
+            <span class="label">Guard</span>
+            <span class="value" id="guardText">100</span>
+            <div class="meter guard"><span id="guardBar"></span></div>
+          </div>
+        </div>
+        <div class="sticker-row" aria-hidden="true">
+          <span class="sticker">Crowd: Wild</span>
+          <span class="sticker">Guard Up</span>
+          <span class="sticker">No Boring Jabs</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Instructions</h3>
+        <ul class="instructions">
+          <li><span class="key">WASD</span> or <span class="key">Arrows</span> move around the ring.</li>
+          <li><span class="key">Space</span> hold to block. Blocking a punch scores a counter.</li>
+          <li>Dodge red gloves. Golden gloves hit harder but are worth more to block.</li>
+          <li>Snag teal towels for quick health. Stay inside the ropes.</li>
+          <li>Press <span class="key">P</span> to pause.</li>
+        </ul>
+      </section>
+
+      <section class="panel touch-pad" aria-label="Touch controls">
+        <button data-touch="up">Up</button>
+        <button data-touch="block">Block</button>
+        <button data-touch="down">Down</button>
+        <button data-touch="left">Left</button>
+        <button data-touch="right">Right</button>
+        <button data-touch="pause">Pause</button>
+        <button class="wide" data-touch="dash">Quick Shuffle</button>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const healthText = document.getElementById("healthText");
+    const guardText = document.getElementById("guardText");
+    const healthBar = document.getElementById("healthBar");
+    const guardBar = document.getElementById("guardBar");
+    const mobileScore = document.getElementById("mobileScore");
+    const mobileTime = document.getElementById("mobileTime");
+    const mobileHealth = document.getElementById("mobileHealth");
+    const mobileGuard = document.getElementById("mobileGuard");
+    const scoreCard = document.getElementById("scoreCard");
+    const healthCard = document.getElementById("healthCard");
+    const guardCard = document.getElementById("guardCard");
+    const timeCard = document.getElementById("timeCard");
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const startButton = document.getElementById("startButton");
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const ring = { x: 92, y: 72, w: 776, h: 456 };
+    const keys = new Set();
+    const touch = { left: false, right: false, up: false, down: false, block: false };
+    let lastTime = 0;
+    let running = false;
+    let paused = false;
+    let gameOver = false;
+    let shake = 0;
+    let flash = 0;
+    let spawnTimer = 0;
+    let towelTimer = 8;
+    let comboTimer = 0;
+    let combo = 0;
+    let lastScore = 0;
+    let confetti = [];
+    let gloves = [];
+    let towels = [];
+
+    const player = {
+      x: W / 2,
+      y: H / 2 + 60,
+      r: 25,
+      vx: 0,
+      vy: 0,
+      health: 100,
+      guard: 100,
+      score: 0,
+      block: false,
+      invuln: 0,
+      shuffle: 0
+    };
+
+    const fight = {
+      duration: 60,
+      timeLeft: 60,
+      elapsed: 0,
+      bestCombo: 0
+    };
+
+    function resetGame() {
+      player.x = W / 2;
+      player.y = H / 2 + 60;
+      player.health = 100;
+      player.guard = 100;
+      player.score = 0;
+      lastScore = 0;
+      player.invuln = 0;
+      player.shuffle = 0;
+      fight.timeLeft = fight.duration;
+      fight.elapsed = 0;
+      fight.bestCombo = 0;
+      gloves = [];
+      towels = [];
+      confetti = [];
+      combo = 0;
+      comboTimer = 0;
+      spawnTimer = 0;
+      towelTimer = 5;
+      shake = 0;
+      flash = 0;
+      paused = false;
+      gameOver = false;
+      running = true;
+      document.body.classList.add("playing");
+      overlay.hidden = true;
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    function spawnGlove() {
+      const side = Math.floor(Math.random() * 4);
+      const big = Math.random() < Math.min(.18 + fight.elapsed * .004, .38);
+      let x;
+      let y;
+      if (side === 0) {
+        x = ring.x + Math.random() * ring.w;
+        y = ring.y - 44;
+      } else if (side === 1) {
+        x = ring.x + ring.w + 44;
+        y = ring.y + Math.random() * ring.h;
+      } else if (side === 2) {
+        x = ring.x + Math.random() * ring.w;
+        y = ring.y + ring.h + 44;
+      } else {
+        x = ring.x - 44;
+        y = ring.y + Math.random() * ring.h;
+      }
+      const aimX = player.x + (Math.random() - .5) * 90;
+      const aimY = player.y + (Math.random() - .5) * 90;
+      const angle = Math.atan2(aimY - y, aimX - x);
+      const speed = (big ? 190 : 250) + Math.min(fight.elapsed * 3.4, 160);
+      gloves.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: big ? 25 : 18,
+        spin: Math.random() * Math.PI,
+        big,
+        wobble: Math.random() * 6.28,
+        life: 6
+      });
+    }
+
+    function spawnTowel() {
+      towels.push({
+        x: ring.x + 54 + Math.random() * (ring.w - 108),
+        y: ring.y + 54 + Math.random() * (ring.h - 108),
+        r: 15,
+        life: 8,
+        bob: Math.random() * 6.28
+      });
+    }
+
+    function loop(now) {
+      if (!running) return;
+      const dt = Math.min((now - lastTime) / 1000 || 0, .033);
+      lastTime = now;
+      if (!paused && !gameOver) update(dt);
+      draw();
+      if (running) requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      fight.elapsed += dt;
+      fight.timeLeft = Math.max(0, fight.duration - fight.elapsed);
+      player.invuln = Math.max(0, player.invuln - dt);
+      player.shuffle = Math.max(0, player.shuffle - dt);
+      shake = Math.max(0, shake - dt * 15);
+      flash = Math.max(0, flash - dt * 3);
+      comboTimer = Math.max(0, comboTimer - dt);
+      if (comboTimer === 0) combo = 0;
+
+      const wantsBlock = keys.has(" ") || touch.block;
+      player.block = wantsBlock && player.guard > 4;
+      if (player.block) {
+        player.guard = Math.max(0, player.guard - dt * 18);
+      } else {
+        player.guard = Math.min(100, player.guard + dt * 24);
+      }
+
+      let ax = 0;
+      let ay = 0;
+      if (keys.has("ArrowLeft") || keys.has("a") || touch.left) ax -= 1;
+      if (keys.has("ArrowRight") || keys.has("d") || touch.right) ax += 1;
+      if (keys.has("ArrowUp") || keys.has("w") || touch.up) ay -= 1;
+      if (keys.has("ArrowDown") || keys.has("s") || touch.down) ay += 1;
+
+      const mag = Math.hypot(ax, ay) || 1;
+      const speed = player.block ? 160 : 245;
+      player.vx = ax / mag * speed;
+      player.vy = ay / mag * speed;
+      player.x += player.vx * dt;
+      player.y += player.vy * dt;
+      player.x = clamp(player.x, ring.x + player.r, ring.x + ring.w - player.r);
+      player.y = clamp(player.y, ring.y + player.r, ring.y + ring.h - player.r);
+
+      spawnTimer -= dt;
+      const interval = Math.max(.34, .92 - fight.elapsed * .012);
+      if (spawnTimer <= 0) {
+        spawnGlove();
+        if (fight.elapsed > 16 && Math.random() < .22) spawnGlove();
+        spawnTimer = interval;
+      }
+
+      towelTimer -= dt;
+      if (towelTimer <= 0) {
+        spawnTowel();
+        towelTimer = 9 + Math.random() * 5;
+      }
+
+      updateGloves(dt);
+      updateTowels(dt);
+      confetti.forEach(piece => {
+        piece.x += piece.vx * dt;
+        piece.y += piece.vy * dt;
+        piece.vy += 400 * dt;
+        piece.life -= dt;
+        piece.rot += piece.spin * dt;
+      });
+      confetti = confetti.filter(piece => piece.life > 0);
+
+      if (player.health <= 0 || fight.timeLeft <= 0) endGame();
+      updateHud();
+    }
+
+    function updateGloves(dt) {
+      for (const glove of gloves) {
+        glove.x += glove.vx * dt;
+        glove.y += glove.vy * dt;
+        glove.spin += dt * (glove.big ? 4 : 8);
+        glove.life -= dt;
+        const hit = Math.hypot(glove.x - player.x, glove.y - player.y) < glove.r + player.r;
+        if (!hit || player.invuln > 0) continue;
+        glove.life = 0;
+        if (player.block) {
+          combo += 1;
+          comboTimer = 1.8;
+          fight.bestCombo = Math.max(fight.bestCombo, combo);
+          const points = glove.big ? 260 : 110;
+          player.score += points + combo * 18;
+          player.guard = Math.max(0, player.guard - (glove.big ? 28 : 16));
+          player.invuln = .18;
+          shake = glove.big ? 9 : 5;
+          burst(glove.x, glove.y, glove.big ? "#ffca3a" : "#10b4a3", glove.big ? 18 : 11);
+        } else {
+          player.health -= glove.big ? 22 : 12;
+          combo = 0;
+          comboTimer = 0;
+          player.invuln = .48;
+          shake = glove.big ? 15 : 10;
+          flash = 1;
+          burst(player.x, player.y, "#ef3f3f", glove.big ? 20 : 12);
+        }
+      }
+      gloves = gloves.filter(glove => glove.life > 0 && glove.x > -90 && glove.x < W + 90 && glove.y > -90 && glove.y < H + 90);
+    }
+
+    function updateTowels(dt) {
+      for (const towel of towels) {
+        towel.life -= dt;
+        towel.bob += dt * 4;
+        if (Math.hypot(towel.x - player.x, towel.y - player.y) < towel.r + player.r) {
+          towel.life = 0;
+          player.health = Math.min(100, player.health + 16);
+          player.score += 50;
+          burst(towel.x, towel.y, "#4fd36f", 14);
+        }
+      }
+      towels = towels.filter(towel => towel.life > 0);
+    }
+
+    function burst(x, y, color, amount) {
+      for (let i = 0; i < amount; i += 1) {
+        const a = Math.random() * Math.PI * 2;
+        const s = 80 + Math.random() * 240;
+        confetti.push({
+          x,
+          y,
+          vx: Math.cos(a) * s,
+          vy: Math.sin(a) * s - 60,
+          w: 6 + Math.random() * 9,
+          h: 4 + Math.random() * 7,
+          life: .45 + Math.random() * .55,
+          color,
+          rot: Math.random() * Math.PI,
+          spin: -8 + Math.random() * 16
+        });
+      }
+    }
+
+    function endGame() {
+      running = false;
+      document.body.classList.remove("playing");
+      gameOver = true;
+      overlay.hidden = false;
+      const won = player.health > 0;
+      overlayTitle.textContent = won ? "Bell Saved!" : "Canvas Nap!";
+      overlayText.textContent = won
+        ? `Final score: ${Math.round(player.score)}. Best block combo: ${fight.bestCombo}. The crowd is throwing popcorn in admiration.`
+        : `Final score: ${Math.round(player.score)}. Best block combo: ${fight.bestCombo}. Shake it off and try another round.`;
+      startButton.textContent = "Rematch";
+      updateHud();
+    }
+
+    function draw() {
+      ctx.save();
+      ctx.clearRect(0, 0, W, H);
+      const sx = shake ? (Math.random() - .5) * shake : 0;
+      const sy = shake ? (Math.random() - .5) * shake : 0;
+      ctx.translate(sx, sy);
+      drawArena();
+      towels.forEach(drawTowel);
+      gloves.forEach(drawGlove);
+      drawPlayer();
+      confetti.forEach(drawConfetti);
+      drawFloatingText();
+      ctx.restore();
+
+      if (flash > 0) {
+        ctx.fillStyle = `rgba(239, 63, 63, ${flash * .18})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      if (paused) {
+        ctx.fillStyle = "rgba(23, 18, 15, .42)";
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#fff6df";
+        ctx.strokeStyle = "#17120f";
+        ctx.lineWidth = 7;
+        ctx.font = "900 70px Trebuchet MS";
+        ctx.textAlign = "center";
+        ctx.strokeText("PAUSED", W / 2, H / 2);
+        ctx.fillText("PAUSED", W / 2, H / 2);
+      }
+    }
+
+    function drawArena() {
+      const pulse = Math.sin(fight.elapsed * 5) * .5 + .5;
+      ctx.fillStyle = "#f3cc75";
+      ctx.fillRect(0, 0, W, H);
+
+      for (let i = 0; i < 22; i += 1) {
+        ctx.fillStyle = i % 2 ? "rgba(255,255,255,.18)" : "rgba(23,18,15,.05)";
+        ctx.fillRect(0, i * 28, W, 14);
+      }
+
+      drawCrowd(pulse);
+
+      ctx.fillStyle = "#ffd98f";
+      ctx.fillRect(ring.x, ring.y, ring.w, ring.h);
+
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 10;
+      ctx.strokeRect(ring.x, ring.y, ring.w, ring.h);
+
+      const ropeColors = ["#ef3f3f", "#fff6df", "#3156c8"];
+      ropeColors.forEach((color, i) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 7;
+        const inset = 18 + i * 20;
+        ctx.strokeRect(ring.x + inset, ring.y + inset, ring.w - inset * 2, ring.h - inset * 2);
+      });
+
+      drawCorner(ring.x, ring.y, "#ef3f3f");
+      drawCorner(ring.x + ring.w, ring.y, "#3156c8");
+      drawCorner(ring.x, ring.y + ring.h, "#10b4a3");
+      drawCorner(ring.x + ring.w, ring.y + ring.h, "#ffca3a");
+
+      ctx.fillStyle = "rgba(23,18,15,.08)";
+      ctx.beginPath();
+      ctx.ellipse(W / 2, H / 2 + 58, 165, 45, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawCrowd(pulse) {
+      const rows = [
+        { y: 18, color: "#ef3f3f", offset: 0 },
+        { y: 42, color: "#3156c8", offset: 16 },
+        { y: 554, color: "#10b4a3", offset: 8 },
+        { y: 578, color: "#ffca3a", offset: 24 }
+      ];
+      for (const row of rows) {
+        for (let x = -20 + row.offset; x < W + 20; x += 32) {
+          ctx.fillStyle = row.color;
+          ctx.strokeStyle = "#17120f";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(x, row.y + Math.sin((x + fight.elapsed * 120) * .035) * 4, 8 + pulse * 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+      const lights = [
+        { x: 92, y: 36, color: "#ffca3a" },
+        { x: 868, y: 36, color: "#fff6df" },
+        { x: 92, y: 560, color: "#fff6df" },
+        { x: 868, y: 560, color: "#ff6fb1" }
+      ];
+      lights.forEach(light => {
+        const beam = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, 150);
+        beam.addColorStop(0, light.color);
+        beam.addColorStop(.28, "rgba(255,255,255,.22)");
+        beam.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = beam;
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, 150, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawCorner(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.arc(x, y, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawPlayer() {
+      const blockScale = player.block ? 1 : 0;
+      ctx.save();
+      ctx.translate(player.x, player.y);
+
+      ctx.fillStyle = "rgba(23,18,15,.2)";
+      ctx.beginPath();
+      ctx.ellipse(0, 31, 34, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#3d2b24";
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, -18, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#fff6df";
+      ctx.beginPath();
+      ctx.arc(-8, -23, 4, 0, Math.PI * 2);
+      ctx.arc(8, -23, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#17120f";
+      ctx.beginPath();
+      ctx.arc(-7, -22, 2, 0, Math.PI * 2);
+      ctx.arc(9, -22, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, -11, 8, 0, Math.PI);
+      ctx.stroke();
+
+      ctx.fillStyle = "#10b4a3";
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 5;
+      roundRect(-21, 5, 42, 35, 11, true, true);
+
+      drawPlayerGlove(-28 + blockScale * 14, -2 - blockScale * 10, "#ef3f3f");
+      drawPlayerGlove(28 - blockScale * 14, -2 - blockScale * 10, "#ef3f3f");
+
+      if (player.block) {
+        ctx.strokeStyle = "rgba(255,246,223,.78)";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(0, -7, 42, -2.75, -.38);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, -7, 42, -2.76 + Math.PI, -.38 + Math.PI);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawPlayerGlove(x, y, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#fff6df";
+      ctx.fillRect(-6, 10, 12, 10);
+      ctx.restore();
+    }
+
+    function drawGlove(glove) {
+      ctx.save();
+      ctx.translate(glove.x, glove.y);
+      ctx.rotate(glove.spin);
+      ctx.fillStyle = glove.big ? "#ffca3a" : "#ef3f3f";
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = glove.big ? 6 : 5;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, glove.r * 1.15, glove.r * .9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#fff6df";
+      roundRect(-glove.r * .22, glove.r * .45, glove.r * .5, glove.r * .52, 5, true, false);
+      ctx.strokeStyle = "rgba(23,18,15,.35)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(-glove.r * .25, -2, glove.r * .45, -1.1, .75);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawTowel(towel) {
+      ctx.save();
+      ctx.translate(towel.x, towel.y + Math.sin(towel.bob) * 5);
+      ctx.rotate(Math.sin(towel.bob) * .18);
+      ctx.fillStyle = "#4fd36f";
+      ctx.strokeStyle = "#17120f";
+      ctx.lineWidth = 4;
+      roundRect(-17, -12, 34, 24, 6, true, true);
+      ctx.strokeStyle = "#fff6df";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-9, -5);
+      ctx.lineTo(9, 5);
+      ctx.moveTo(9, -5);
+      ctx.lineTo(-9, 5);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawConfetti(piece) {
+      ctx.save();
+      ctx.translate(piece.x, piece.y);
+      ctx.rotate(piece.rot);
+      ctx.fillStyle = piece.color;
+      ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+      ctx.restore();
+    }
+
+    function drawFloatingText() {
+      if (combo > 1 && comboTimer > 0) {
+        ctx.fillStyle = "#17120f";
+        ctx.strokeStyle = "#fff6df";
+        ctx.lineWidth = 7;
+        ctx.font = "900 34px Trebuchet MS";
+        ctx.textAlign = "center";
+        const text = `${combo}x COUNTER`;
+        ctx.strokeText(text, player.x, player.y - 58);
+        ctx.fillText(text, player.x, player.y - 58);
+      }
+    }
+
+    function roundRect(x, y, w, h, r, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function updateHud() {
+      const score = Math.round(player.score);
+      scoreEl.textContent = score;
+      const time = Math.ceil(fight.timeLeft);
+      const health = Math.max(0, Math.round(player.health));
+      const guard = Math.round(player.guard);
+      timeEl.textContent = time;
+      healthText.textContent = health;
+      guardText.textContent = guard;
+      mobileScore.textContent = score;
+      mobileTime.textContent = time;
+      mobileHealth.textContent = health;
+      mobileGuard.textContent = guard;
+      healthBar.style.transform = `scaleX(${clamp(player.health / 100, 0, 1)})`;
+      guardBar.style.transform = `scaleX(${clamp(player.guard / 100, 0, 1)})`;
+      if (score !== lastScore) {
+        scoreCard.classList.remove("hot");
+        void scoreCard.offsetWidth;
+        scoreCard.classList.add("hot");
+        lastScore = score;
+      }
+      healthCard.classList.toggle("low", player.health <= 35);
+      guardCard.classList.toggle("low", player.guard <= 28);
+      timeCard.classList.toggle("low", fight.timeLeft <= 10);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function triggerShuffle() {
+      if (!running || paused || player.shuffle > 0) return;
+      player.shuffle = .8;
+      const dx = (Math.random() - .5) * 140;
+      const dy = (Math.random() - .5) * 120;
+      player.x = clamp(player.x + dx, ring.x + player.r, ring.x + ring.w - player.r);
+      player.y = clamp(player.y + dy, ring.y + player.r, ring.y + ring.h - player.r);
+      player.score = Math.max(0, player.score - 20);
+      burst(player.x, player.y, "#fff6df", 8);
+    }
+
+    window.addEventListener("keydown", event => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      if ([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+      }
+      if (key === "p" && running && !gameOver) {
+        paused = !paused;
+        return;
+      }
+      if (key === "shift") triggerShuffle();
+      keys.add(key);
+    });
+
+    window.addEventListener("keyup", event => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      keys.delete(key);
+    });
+
+    document.querySelectorAll("[data-touch]").forEach(button => {
+      const action = button.dataset.touch;
+      const set = value => {
+        if (action in touch) touch[action] = value;
+      };
+      button.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        if (action === "pause" && running && !gameOver) paused = !paused;
+        if (action === "dash") triggerShuffle();
+        set(true);
+      });
+      button.addEventListener("pointerup", () => set(false));
+      button.addEventListener("pointercancel", () => set(false));
+      button.addEventListener("pointerleave", () => set(false));
+    });
+
+    startButton.addEventListener("click", () => {
+      lastTime = performance.now();
+      resetGame();
+    });
+
+    updateHud();
+    draw();
+  </script>
+</body>
+</html>
